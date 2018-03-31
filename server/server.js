@@ -71,11 +71,16 @@ app.listen(port, () => {
 app.get('/todos/paginate/:page', (req, res) =>{
     var perPage = 2;
     var page = req.params.page || 1;
+   if(!checkForNumericVal(page)){
+res.status(400).send('Bad Request');
+   }
     Todo.find({}).skip((perPage * page) - perPage).limit(perPage).then((todos) =>{
                res.send(todos);          
         }).catch((e) => {
     res.status(400).send('Bad Request');
   });
 });
-
+ function checkForNumericVal (n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+};
 module.exports = {app};
