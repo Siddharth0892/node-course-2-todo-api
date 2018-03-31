@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000;
 //with this middleware we can send JSON to our express application
 app.use(bodyParser.json());
 // Resource creation endpoint
-app.post('/todos', (req, res) => {
+app.post('/todos/addtodo', (req, res) => {
   var todo = new Todo({
     text: req.body.text
   });
@@ -34,24 +34,48 @@ app.get('/todos', (req, res) => {
 // GET/todos/{The id that needs to be fetched} - fetch the value from url
 app.get('/todos/:id', (req, res) => {
   var id = req.params.id;
-
   if (!ObjectID.isValid(id)) {
-    return res.status(404).send();
+    res.status(404).send('ObjectID is Invalid');
   }
-
   Todo.findById(id).then((todo) => {
     if (!todo) {
-      return res.status(404).send();
+       res.status(404).send('Document Not Found');
     }
 
     res.send({todo});
   }).catch((e) => {
-    res.status(400).send();
+    res.status(400).send('Bad Request');
   });
 });
 
+// DELETE API
+app.get('/todos/remove/:id', (req, res) => {
+  var id = req.params.id;
+  if (!ObjectID.isValid(id)) {
+    res.status(404).send('ObjectID is invalid');
+  }
+
+  Todo.findByIdAndRemove(id).then((todo) => {
+    if (!todo) {
+       res.status(404).send('Document Not Found');
+    }
+    res.send(todo);
+  }).catch((e) => {
+    res.status(400).send('Bad Request');
+  });
+});
 app.listen(port, () => {
-  console.log('Started on port ${port}');
+  console.log('Started on port : '+port);
+});
+// Implementation of pagination
+app.get('/todos/paginate/:page', (req, res) =>{
+    var perPage = 2;
+    var page = req.params.page || 1;
+    Todo.find({}).skip((perPage * page) - perPage).limit(perPage).then((todos) =>{
+               res.send(todos);          
+        }).catch((e) => {
+    res.status(400).send('Bad Request');
+  });
 });
 
 module.exports = {app};
