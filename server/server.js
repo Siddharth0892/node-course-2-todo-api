@@ -72,7 +72,7 @@ app.get('/todos/paginate/:page', (req, res) =>{
     var perPage = 2;
     var page = req.params.page || 1;
    if(!checkForNumericVal(page)){
-res.status(400).send('Bad Request');
+		res.status(400).send('Bad Request');
    }
     Todo.find({}).skip((perPage * page) - perPage).limit(perPage).then((todos) =>{
                res.send(todos);          
